@@ -2,7 +2,7 @@
 <head>
 <style>
     .segment{
-        background: white;
+        background: #ededed;
         margin: 0px;
     }
     .segmentLeft, .segmentRight{
@@ -48,6 +48,8 @@
         grid-row-end: 3;
         width: fit-content;
         grid-gap: 0px;
+        margin-right: 5px;
+        margin-left: 5px;
     }
     .digit .segmentLeft:nth-of-type(1){
         grid-row-start: 1;
@@ -86,20 +88,116 @@
         grid-column-start: 2;
         align-self: end;
     }
-    .digit .on{
+    .digit .on, .colon{
         background: grey;
+        box-shadow: 3px 3px 3px #4d4d4d9c;
+    }
+    .digitContainer{
+        display: inline-block;
+    }
+    .colon{
+        display: inline-block;
+        width: 40px;
+    }
+    .colon::before{
+        content: "";
+        width: 20px;
+        height: 20px;
+        background: grey;
+        border-radius: 100%;
+        position: absolute;
+        margin-top: 60px;
+        margin-left: 10px;
+    }
+    .colon::after{
+        content: "";
+        width: 20px;
+        height: 20px;
+        background: grey;
+        border-radius: 100%;
+        position: absolute;
+        margin-top: -60px;
+        margin-left: 10px;
+    }
+    #clockContainer{
+        transform: scale(50%);
+        box-shadow: 0px 0px 10px grey;
+        padding: 30px 10px;
+        white-space: nowrap;
+        overflow-x: auto;
     }
 </style>
 </head>
 <body>
-<div id="firstDigit" class="digit">
-    <div class="segment segmentLeft"></div>
-    <div class="segment segmentLeft"></div>
-    <div class="segment segmentRight"></div>
-    <div class="segment segmentRight"></div>
-    <div class="segment segmentTop"></div>
-    <div class="segment segmentMiddle"></div>
-    <div class="segment segmentBottom"></div>
+<div id="clockContainer">
+    <div class="digitContainer">
+        <div id="firstDigit" class="digit">
+            <div class="segment segmentLeft"></div>
+            <div class="segment segmentLeft"></div>
+            <div class="segment segmentRight"></div>
+            <div class="segment segmentRight"></div>
+            <div class="segment segmentTop"></div>
+            <div class="segment segmentMiddle"></div>
+            <div class="segment segmentBottom"></div>
+        </div>
+    </div>
+    <div class="digitContainer">
+        <div id="secondtDigit" class="digit">
+            <div class="segment segmentLeft"></div>
+            <div class="segment segmentLeft"></div>
+            <div class="segment segmentRight"></div>
+            <div class="segment segmentRight"></div>
+            <div class="segment segmentTop"></div>
+            <div class="segment segmentMiddle"></div>
+            <div class="segment segmentBottom"></div>
+        </div>
+    </div>
+    <div class="colon"></div>
+    <div class="digitContainer">
+        <div id="thirdDigit" class="digit">
+            <div class="segment segmentLeft"></div>
+            <div class="segment segmentLeft"></div>
+            <div class="segment segmentRight"></div>
+            <div class="segment segmentRight"></div>
+            <div class="segment segmentTop"></div>
+            <div class="segment segmentMiddle"></div>
+            <div class="segment segmentBottom"></div>
+        </div>
+    </div>
+    <div class="digitContainer">
+        <div id="fourthDigit" class="digit">
+            <div class="segment segmentLeft"></div>
+            <div class="segment segmentLeft"></div>
+            <div class="segment segmentRight"></div>
+            <div class="segment segmentRight"></div>
+            <div class="segment segmentTop"></div>
+            <div class="segment segmentMiddle"></div>
+            <div class="segment segmentBottom"></div>
+        </div>
+    </div>
+    <div class="colon"></div>
+    <div class="digitContainer">
+        <div id="fifthDigit" class="digit">
+            <div class="segment segmentLeft"></div>
+            <div class="segment segmentLeft"></div>
+            <div class="segment segmentRight"></div>
+            <div class="segment segmentRight"></div>
+            <div class="segment segmentTop"></div>
+            <div class="segment segmentMiddle"></div>
+            <div class="segment segmentBottom"></div>
+        </div>
+    </div>
+    <div class="digitContainer">
+        <div id="sixthDigit" class="digit">
+            <div class="segment segmentLeft"></div>
+            <div class="segment segmentLeft"></div>
+            <div class="segment segmentRight"></div>
+            <div class="segment segmentRight"></div>
+            <div class="segment segmentTop"></div>
+            <div class="segment segmentMiddle"></div>
+            <div class="segment segmentBottom"></div>
+        </div>
+    </div>
 </div>
 </body>
 <script>
@@ -172,5 +270,32 @@ function chase(){
         digitIndex = (digitIndex + 1) % 6
     }, 100)
 }
+
+function leftpad(input_string, target_length, padding_char){
+    var padded_string = input_string
+    while (padded_string.length < target_length){
+        padded_string = padding_char + padded_string
+    }
+    return padded_string
+}
+
+function setTime(){
+    var date = new Date()
+    var hours = leftpad(date.getHours().toString(), 2, 0)
+    var minutes = leftpad(date.getMinutes().toString(), 2, 0)
+    var seconds = leftpad(date.getSeconds().toString(), 2, 0)
+    var time = hours+minutes+seconds
+    for (var i=0; i<time.length; i++){
+        setDigit(document.getElementsByClassName("digit")[i], time[i], digitCodes)
+    }
+}
+
+function startClock(){
+    return setInterval(function(){
+        setTime();
+    }, 30)
+}
+
+startClock()
 </script>
 </html>
