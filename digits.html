@@ -257,6 +257,42 @@ var digitCodes = {
     "F": [1,1,0,0,1,1,0],
 }
 
+var extendedDigitCodes = {
+    " ": [0,0,0,0,0,0,0],
+    "-": [0,0,0,0,0,1,0],
+    "a": [1,1,1,1,1,1,0], // upper case A
+    "b": [1,1,0,1,0,1,1], // lower case b
+    "c": [0,1,0,0,0,1,1], // little c
+    "d": [0,1,1,1,0,1,1], // lower case d
+    "e": [1,1,0,0,1,1,1], // upper case E
+    "f": [1,1,0,0,1,1,0], // upper case F
+    "H": [1,1,1,1,0,1,0],
+    "h": [1,1,1,1,0,1,0], // same as upper
+    "J": [0,0,1,1,0,0,1],
+    "j": [0,0,1,1,0,0,1], // same as upper
+    "L": [1,1,0,0,0,0,1],
+    "l": [1,1,0,0,0,0,1], // same as upper
+    "N": [1,1,1,1,1,0,0], // more like an upside down U
+    "n": [1,1,1,1,1,0,0], // same as upper
+    "o": [0,1,0,1,0,1,1], // little o
+    "O": [1,1,1,1,1,0,1], // literally just 0
+    "P": [1,1,1,0,1,1,0],
+    "p": [1,1,1,0,1,1,0], // same as upper
+    "Q": [1,0,1,1,1,1,0],
+    "q": [1,0,1,1,1,1,0], // same as upper
+    "S": [1,0,0,1,1,1,1], // literally just 5
+    "s": [1,0,0,1,1,1,1], // same as upper
+    "U": [1,1,1,1,0,0,1], // big U
+    "u": [0,1,0,1,0,0,1], // little u
+    "v": [0,1,0,1,0,0,1], // just little u again
+    "Y": [1,0,1,1,0,1,0], // same as 4
+    "y": [1,0,1,1,0,1,0], // same as upper
+    "°": [1,0,1,0,1,1,0], // superscript little o
+    "_": [0,0,0,0,0,0,1]
+}
+
+var allDigitCodes = Object.assign(digitCodes, extendedDigitCodes)
+
 function setDigit(digitElement, number, font){
     var digitCode = font[number]
     for (var i=0; i<digitElement.getElementsByClassName("segment").length; i++){
@@ -367,12 +403,15 @@ async function silly(reverse=false){
     `
     Silly animation instead of a clock
     `
+    // only start if we're in clock mode
     if (!clockIntervalId){
         return 0
     }
 
+    // stop the clock
     clockIntervalId = clearInterval(clockIntervalId);
 
+    // do the thing
     var chaseIntervals = []
 
     for (var i=0; i<document.getElementsByClassName("digit").length; i++){
@@ -386,7 +425,92 @@ async function silly(reverse=false){
         clearInterval(chaseIntervals[i])
     }
 
+    // restart the clock
     clockIntervalId = startClock();
+}
+
+async function scrollMessage(message, repeats){
+    `
+    Shift register type thing.
+    Message can be any of the characters from digitCodes + extendedDigitCodes
+    `
+    // only start if we're in clock mode
+    if (!clockIntervalId){
+        return 0
+    }
+
+    // stop the clock
+    clockIntervalId = clearInterval(clockIntervalId);
+
+    // do the thing
+    // display message
+    var digitArray = [" ", " ", " ", " ", " ", " "] // blanks
+    for (var i=0; i<message.length; i++){
+        digitArray.shift() // removes first element
+        digitArray.push(message[i])
+        setMessage(digitArray.join(""))
+        await new Promise(r => setTimeout(r, 500)); // sleep 500 ms
+    }
+    // push message off screen
+    for (var i=0; i<6; i++){
+        digitArray.shift()
+        digitArray.push(" ")
+        setMessage(digitArray.join(""))
+        await new Promise(r => setTimeout(r, 500)); // sleep 500 ms
+    }
+
+    // restart the clock
+    clockIntervalId = startClock();
+}
+
+function setMessage(message){
+    `
+    Sets a 6 char message on the display
+    Message can be any of the characters from digitCodes + extendedDigitCodes
+    Does not return to the clock when done.
+    Avoid clashing with other routines that set the display.
+    `
+    // stop the clock if it's running
+    if (clockIntervalId){
+        clockIntervalId = clearInterval(clockIntervalId);
+    }
+
+    // truncate message if too long
+    if (message.length > 6){
+        message.slice(0,6)
+    }
+    // right pad message if too short
+    else if (message.length < 6){
+        while (message.length < 6){
+            message = message + " "
+        }
+    }
+
+    message = sanitiseMessage(message); // valid chars only
+    
+    for (var i=0; i<message.length; i++){
+        setDigit(
+            document.getElementById("clockContainer").getElementsByClassName("digit")[i], 
+            message[i], 
+            allDigitCodes
+        )
+    }
+}
+
+function sanitiseMessage(message, replaceChar="_"){
+    `
+    Replaces invalid message characters with replaceChar
+    `
+    var returnMessage = ""
+    for (var i=0; i<message.length; i++){
+        if (Object.keys(allDigitCodes).includes(message[i])){
+            returnMessage += message[i]
+        }
+        else{
+            returnMessage += replaceChar
+        }
+    }
+    return returnMessage
 }
 
 function init(){
