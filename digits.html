@@ -135,6 +135,29 @@
         align-items: center;
         width: fit-content;
     }
+    #buttonsDiv{
+        bottom: 0;
+        width: 100%;
+        position: fixed;
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+    }
+    #buttonsDiv button{
+        background: white;
+        color: lightgray;
+        border: 0px;
+        box-shadow: 0px 0px 5px lightgray;
+        padding: 10px;
+        transition: box-shadow 0.5s, color 0.5s;
+        cursor: pointer;
+        margin-left: 5px;
+        margin-right: 5px;
+    }
+    #buttonsDiv button:hover{
+        box-shadow: 0px 0px 5px gray;
+        color: black;
+    }
 </style>
 </head>
 <body>
@@ -208,6 +231,9 @@
         </div>
     </div>
 </div>
+<div id="buttonsDiv">
+    <button onclick="silly()">Silly</button>
+</div>
 </body>
 <script>
 'use strict'
@@ -262,7 +288,7 @@ function countNums(){
     }, 600)
 }
 
-function chase(){
+function chase(digitElement, reverse=false){
     var chaseCodes = {
         0: [0,0,0,0,1,0,0],
         1: [0,0,1,0,0,0,0],
@@ -272,10 +298,20 @@ function chase(){
         5: [1,0,0,0,0,0,0]
     }
 
+    if (reverse){
+        var reverseChaseCodes = {}
+        var j = 0
+        for (var i=Object.keys(chaseCodes).length - 1; i>= 0; i--){
+            reverseChaseCodes[j] = chaseCodes[i]
+            j += 1;
+        }
+        chaseCodes = reverseChaseCodes
+    }
+
     var digitIndex = 0
 
     return setInterval(function(){
-        setDigit(document.getElementById("firstDigit"), digitIndex, chaseCodes);
+        setDigit(digitElement, digitIndex, chaseCodes);
         digitIndex = (digitIndex + 1) % 6
     }, 100)
 }
@@ -327,12 +363,41 @@ function debounce(func, timeout = 100){
     };
 }
 
+async function silly(reverse=false){
+    `
+    Silly animation instead of a clock
+    `
+    if (!clockIntervalId){
+        return 0
+    }
+
+    clockIntervalId = clearInterval(clockIntervalId);
+
+    var chaseIntervals = []
+
+    for (var i=0; i<document.getElementsByClassName("digit").length; i++){
+        chaseIntervals.push(chase(document.getElementsByClassName("digit")[i], reverse))
+        await new Promise(r => setTimeout(r, 300)); // basically sleep 300 ms
+    }
+
+    await new Promise(r => setTimeout(r, 1000*3)); // 3 seconds
+
+    for (var i=0; i<chaseIntervals.length; i++){
+        clearInterval(chaseIntervals[i])
+    }
+
+    clockIntervalId = startClock();
+}
+
 function init(){
-    startClock();
+    clockIntervalId = startClock();
     scaleClockToWidth();
     const debounceScaleClockToWidth =  debounce(() => scaleClockToWidth());
     window.addEventListener('resize', function(event){debounceScaleClockToWidth()});
 }
+
+// interval id for clock
+var clockIntervalId = false
 
 init();
 </script>
